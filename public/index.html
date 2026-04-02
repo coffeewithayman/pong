@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="Play classic Pong online with real-time multiplayer. Challenge opponents in head-to-head matches. Free, no sign-up required.">
+  <meta name="theme-color" content="#111">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pong Online - Multiplayer Arcade Game">
+  <meta property="og:description" content="Play classic Pong online with real-time multiplayer. Challenge opponents in head-to-head matches. Free, no sign-up required.">
+  <meta property="og:image" content="/favicon.svg">
+  <meta property="og:site_name" content="Pong Online">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Pong Online - Multiplayer Arcade Game">
+  <meta name="twitter:description" content="Play classic Pong online with real-time multiplayer. Challenge opponents in head-to-head matches.">
+
+  <title>Pong Online - Multiplayer Arcade Game</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Name Entry Modal -->
+  <div id="name-modal" class="modal">
+    <div class="modal-content">
+      <h2>Pong Online</h2>
+      <p>Enter your name to join the game</p>
+      <input type="text" id="name-input" maxlength="20" placeholder="Your name" autocomplete="off">
+      <button id="join-btn">Join Game</button>
+      <button id="spectate-btn">Just Watch</button>
+
+      <div class="instructions">
+        <h3>How to Play</h3>
+        <ul>
+          <li><strong>Left player (Champion):</strong> <kbd>↑↓</kbd> or <kbd>W/S</kbd></li>
+          <li><strong>Right player (Challenger):</strong> <kbd>↑↓</kbd> or <kbd>W/S</kbd></li>
+          <li>Survive longer than your opponent to stay on top</li>
+          <li>Queue up to play — spectate while you wait</li>
+          <li>Check the leaderboard for top survivor times</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Area -->
+  <div id="game-container">
+    <!-- Status Bar -->
+    <div id="status-bar">
+      <span id="status-text">Connecting...</span>
+    </div>
+
+    <!-- Canvas Wrapper -->
+    <div id="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+      <!-- Player Labels -->
+      <div id="player-left-label" class="player-label left"></div>
+      <div id="player-right-label" class="player-label right"></div>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div id="mobile-controls">
+      <button id="btn-up" class="control-btn" aria-label="Move Up">&#9650;</button>
+      <button id="btn-down" class="control-btn" aria-label="Move Down">&#9660;</button>
+    </div>
+
+    <!-- Side Panels -->
+    <div id="panels">
+
+    <!-- Waiting Room Panel -->
+    <div id="queue-panel">
+      <h3>Waiting Room</h3>
+      <ul id="queue-list">
+        <li class="queue-empty">No one waiting</li>
+      </ul>
+    </div>
+
+    <!-- Leaderboard Panel -->
+    <div id="leaderboard-panel">
+      <h3>Leaderboard</h3>
+      <table id="leaderboard-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Time</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+    </div>
+
+    </div><!-- /panels -->
+  </div>
+
+  <!-- GitHub Links -->
+  <div id="github-bar">
+    <a href="https://github.com/coffeewithayman/pong" target="_blank" rel="noopener" id="github-icon" aria-label="View on GitHub">
+      <svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+    </a>
+    <a class="github-button" href="https://github.com/coffeewithayman/pong" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star coffeewithayman/pong on GitHub">Star</a>
+  </div>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/renderer.js"></script>
+  <script src="/js/input.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
