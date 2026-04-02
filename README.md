@@ -7,7 +7,7 @@
 
 A real-time multiplayer Pong game with a queue system, persistent leaderboard, and spectator mode — playable in the browser with no installs required.
 
-### 🎮 [Play it live →](https://pong.best){:target="_blank"}
+### 🎮 <a href="https://pong.best" target="_blank">[Play it live →]</a>
 
 > If you find this fun or useful, consider giving it a ⭐ — it helps others find the project!
 
