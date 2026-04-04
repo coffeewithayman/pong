@@ -11,6 +11,7 @@ const UI = {
     this.playerLeftLabel = document.getElementById('player-left-label');
     this.playerRightLabel = document.getElementById('player-right-label');
     this.spectateBtn = document.getElementById('spectate-btn');
+    this.playAgainBtn = document.getElementById('play-again-btn');
   },
 
   showNameModal(onJoin, onSpectate) {
@@ -42,6 +43,20 @@ const UI = {
   setStatus(text, className) {
     this.statusText.textContent = text;
     this.statusText.className = className || '';
+    this.hidePlayAgain();
+  },
+
+  showPlayAgain(callback) {
+    this.playAgainBtn.classList.remove('hidden');
+    this.playAgainBtn.onclick = () => {
+      this.hidePlayAgain();
+      callback();
+    };
+  },
+
+  hidePlayAgain() {
+    this.playAgainBtn.classList.add('hidden');
+    this.playAgainBtn.onclick = null;
   },
 
   updateLeaderboard(entries) {
