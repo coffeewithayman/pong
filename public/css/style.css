@@ -108,6 +108,42 @@ body {
   border-color: #888;
 }
 
+#eliminated-modal h2 {
+  color: #f44;
+}
+
+#rejoin-btn {
+  background: #0f0;
+  color: #000;
+  border: none;
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#rejoin-btn:hover {
+  background: #0d0;
+}
+
+.hint {
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.hint kbd {
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #0f0;
+}
+
 .instructions {
   margin-top: 28px;
   padding-top: 20px;
@@ -173,27 +209,6 @@ body {
 #status-text.queued { color: #ff0; }
 #status-text.spectating { color: #aaa; }
 #status-text.eliminated { color: #f44; }
-
-#play-again-btn {
-  background: #0f0;
-  color: #000;
-  border: none;
-  padding: 6px 16px;
-  font-size: 0.85rem;
-  font-family: inherit;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 12px;
-}
-
-#play-again-btn:hover {
-  background: #0d0;
-}
-
-#play-again-btn.hidden {
-  display: none;
-}
 
 /* Canvas */
 #canvas-wrapper {

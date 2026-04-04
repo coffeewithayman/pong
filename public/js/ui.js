@@ -11,7 +11,9 @@ const UI = {
     this.playerLeftLabel = document.getElementById('player-left-label');
     this.playerRightLabel = document.getElementById('player-right-label');
     this.spectateBtn = document.getElementById('spectate-btn');
-    this.playAgainBtn = document.getElementById('play-again-btn');
+    this.eliminatedModal = document.getElementById('eliminated-modal');
+    this.eliminatedStats = document.getElementById('eliminated-stats');
+    this.rejoinBtn = document.getElementById('rejoin-btn');
   },
 
   showNameModal(onJoin, onSpectate) {
@@ -46,20 +48,34 @@ const UI = {
   setStatus(text, className) {
     this.statusText.textContent = text;
     this.statusText.className = className || '';
-    this.hidePlayAgain();
   },
 
-  showPlayAgain(callback) {
-    this.playAgainBtn.classList.remove('hidden');
-    this.playAgainBtn.onclick = () => {
-      this.hidePlayAgain();
+  showEliminatedModal(survivalMs, points, callback) {
+    const time = this.formatTime(survivalMs);
+    this.eliminatedStats.textContent = `You survived ${time} with ${points} points`;
+
+    const handleRejoin = () => {
+      this.hideEliminatedModal();
       callback();
     };
+
+    this.rejoinBtn.onclick = handleRejoin;
+
+    this._rejoinKeyHandler = (e) => {
+      if (e.key === 'Enter') handleRejoin();
+    };
+
+    document.addEventListener('keydown', this._rejoinKeyHandler);
+    this.eliminatedModal.classList.remove('hidden');
   },
 
-  hidePlayAgain() {
-    this.playAgainBtn.classList.add('hidden');
-    this.playAgainBtn.onclick = null;
+  hideEliminatedModal() {
+    if (this._rejoinKeyHandler) {
+      document.removeEventListener('keydown', this._rejoinKeyHandler);
+      this._rejoinKeyHandler = null;
+    }
+    this.rejoinBtn.onclick = null;
+    this.eliminatedModal.classList.add('hidden');
   },
 
   updateLeaderboard(entries) {
