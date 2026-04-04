@@ -32,8 +32,9 @@ class GameManager {
     this.playerLeft = null;  // { socketId, name, startTime, points }
     this.playerRight = null;
 
-    this.status = 'waiting'; // waiting | playing | paused
+    this.status = 'waiting'; // waiting | playing | paused | countdown
     this.pauseTimeout = null;
+    this.countdownTimeout = null;
   }
 
   onTick(result) {
@@ -137,18 +138,47 @@ class GameManager {
     this.broadcastPlayerInfo();
 
     if (this.playerLeft && this.playerRight) {
-      this.startGame();
+      this.startCountdown();
     } else {
       this.status = 'waiting';
       this.io.to('game').emit('game-status', { status: 'waiting' });
     }
   }
 
-  startGame() {
+  startCountdown() {
     this.engine.reset();
     this.loop.resetInputs();
+    this.status = 'countdown';
+    this.io.to('game').emit('game-status', { status: 'countdown' });
+
+    // Notify both players about their sides
+    this.io.to('game').emit('countdown', { seconds: 3 });
+
+    // Notify that a new player joined (for doorbell sound)
+    this.io.to('game').emit('new-player-joined', {
+      name: this.playerRight ? this.playerRight.name : null,
+    });
+
+    let remaining = 2;
+    this.countdownTimeout = setInterval(() => {
+      if (remaining > 0) {
+        this.io.to('game').emit('countdown', { seconds: remaining });
+        remaining--;
+      } else {
+        clearInterval(this.countdownTimeout);
+        this.countdownTimeout = null;
+        this.startGame();
+      }
+    }, 1000);
+  }
+
+  startGame() {
     this.status = 'playing';
     this.io.to('game').emit('game-status', { status: 'playing' });
+    this.io.to('game').emit('countdown', { seconds: 0 });
+    // Set start times now that game actually begins
+    if (this.playerLeft) this.playerLeft.startTime = Date.now();
+    if (this.playerRight) this.playerRight.startTime = Date.now();
     this.loop.start();
   }
 
@@ -164,7 +194,7 @@ class GameManager {
       socket.emit('your-turn', { side: 'left' });
       this.broadcastPlayerInfo();
       if (this.playerRight) {
-        this.startGame();
+        this.startCountdown();
       } else {
         this.io.to('game').emit('game-status', { status: 'waiting' });
       }
@@ -178,7 +208,7 @@ class GameManager {
       socket.emit('your-turn', { side: 'right' });
       this.broadcastPlayerInfo();
       if (this.playerLeft) {
-        this.startGame();
+        this.startCountdown();
       }
     } else {
       // Both slots full, add to queue
@@ -205,6 +235,12 @@ class GameManager {
     if (this.queue.remove(socket.id)) {
       this.broadcastQueuePositions();
       return;
+    }
+
+    // If disconnecting during countdown, cancel it
+    if (this.countdownTimeout) {
+      clearInterval(this.countdownTimeout);
+      this.countdownTimeout = null;
     }
 
     // If they were an active player, treat as forfeit
@@ -239,6 +275,12 @@ class GameManager {
 
   // Force a score for testing
   forceScore(side) {
+    // If in countdown, skip to playing first
+    if (this.status === 'countdown' && this.countdownTimeout) {
+      clearInterval(this.countdownTimeout);
+      this.countdownTimeout = null;
+      this.startGame();
+    }
     if (this.status === 'playing') {
       this.onScore(side);
     }
@@ -248,6 +290,10 @@ class GameManager {
   resetForTest() {
     this.loop.stop();
     clearTimeout(this.pauseTimeout);
+    if (this.countdownTimeout) {
+      clearInterval(this.countdownTimeout);
+      this.countdownTimeout = null;
+    }
     this.playerLeft = null;
     this.playerRight = null;
     this.queue = new PlayerQueue();
@@ -294,6 +340,7 @@ class GameManager {
       leaderboard: this.leaderboard.getTop(),
       queueSize: this.queue.size(),
       queueNames: this.queue.getAll().map((p) => p.name),
+      colors: { left: '#4fc3f7', right: '#ff9800' },
     };
   }
 }

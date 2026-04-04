@@ -1,5 +1,8 @@
 // UI manager for status, leaderboard, and modals
 const UI = {
+  colors: { left: '#4fc3f7', right: '#ff9800' },
+  doorbellAudioCtx: null,
+
   init() {
     this.statusText = document.getElementById('status-text');
     this.nameModal = document.getElementById('name-modal');
@@ -95,11 +98,13 @@ const UI = {
   updatePlayerLabels(playerInfo) {
     if (playerInfo && playerInfo.left) {
       this.playerLeftLabel.textContent = `${playerInfo.left.name} [${playerInfo.left.points}]`;
+      this.playerLeftLabel.style.color = this.colors.left;
     } else {
       this.playerLeftLabel.textContent = '';
     }
     if (playerInfo && playerInfo.right) {
       this.playerRightLabel.textContent = `${playerInfo.right.name} [${playerInfo.right.points}]`;
+      this.playerRightLabel.style.color = this.colors.right;
     } else {
       this.playerRightLabel.textContent = '';
     }
@@ -119,6 +124,37 @@ const UI = {
       li.innerHTML = `<span class="queue-position">${i + 1}.</span> ${this.escapeHtml(name)}`;
       this.queueList.appendChild(li);
     });
+  },
+
+  playDoorbell() {
+    try {
+      if (!this.doorbellAudioCtx) {
+        this.doorbellAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = this.doorbellAudioCtx;
+      const now = ctx.currentTime;
+
+      // Two-tone doorbell: ding-dong
+      const frequencies = [659, 523]; // E5, C5
+      const durations = [0.15, 0.25];
+      let offset = 0;
+
+      frequencies.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.3, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + durations[i] + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + durations[i] + 0.15);
+        offset += durations[i] + 0.05;
+      });
+    } catch (e) {
+      // Audio not supported or blocked - silently ignore
+    }
   },
 
   formatTime(ms) {
