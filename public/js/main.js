@@ -85,9 +85,7 @@
   socket.on('eliminated', (data) => {
     mySide = null;
     Input.setPlayerState(false);
-    const time = UI.formatTime(data.survivalMs);
-    UI.setStatus(`Eliminated! You survived ${time} with ${data.points} points`, 'eliminated');
-    UI.showPlayAgain(() => {
+    UI.showEliminatedModal(data.survivalMs, data.points, () => {
       socket.emit('join', { name: myName });
       UI.setStatus('Waiting for game...', 'spectating');
     });
