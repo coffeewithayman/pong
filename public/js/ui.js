@@ -17,11 +17,14 @@ const UI = {
   showNameModal(onJoin, onSpectate) {
     this.nameModal.classList.remove('hidden');
     this.gameContainer.classList.remove('active');
+    const saved = localStorage.getItem('pong-name');
+    if (saved) this.nameInput.value = saved;
     this.nameInput.focus();
 
     const submit = () => {
       const name = this.nameInput.value.trim();
       if (name) {
+        localStorage.setItem('pong-name', name);
         onJoin(name);
         this.nameModal.classList.add('hidden');
         this.gameContainer.classList.add('active');
