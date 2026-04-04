@@ -37,7 +37,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 #         claude_args: "--haiku"
 #         claude_args: "--claude-sonnet-4-6"
-          claude_args: "--claude-opus-4-6 --effort medium"
+          claude_args: "--model claude-opus-4-6 --effort medium"
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
