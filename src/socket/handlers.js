@@ -2,6 +2,7 @@ const C = require('../game/constants');
 
 function setupSocketHandlers(io, gameManager) {
   io.on('connection', (socket) => {
+    console.log(`[Socket] connected: ${socket.id}`);
     // Join the game room for broadcasts
     socket.join('game');
 
@@ -20,6 +21,7 @@ function setupSocketHandlers(io, gameManager) {
     socket.on('join', (data) => {
       const name = (data && data.name) ? data.name.toString().trim().slice(0, 20) : 'Anonymous';
       if (!name) return;
+      console.log(`[Socket] join request: ${socket.id} as "${name}"`);
       gameManager.handleJoin(socket, name);
     });
 
@@ -33,6 +35,7 @@ function setupSocketHandlers(io, gameManager) {
 
     // Disconnect
     socket.on('disconnect', () => {
+      console.log(`[Socket] disconnected: ${socket.id}`);
       gameManager.handleDisconnect(socket);
     });
   });
