@@ -174,6 +174,27 @@ body {
 #status-text.spectating { color: #aaa; }
 #status-text.eliminated { color: #f44; }
 
+#play-again-btn {
+  background: #0f0;
+  color: #000;
+  border: none;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+#play-again-btn:hover {
+  background: #0d0;
+}
+
+#play-again-btn.hidden {
+  display: none;
+}
+
 /* Canvas */
 #canvas-wrapper {
   position: relative;

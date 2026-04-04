@@ -6,6 +6,7 @@
   let gameStatus = 'waiting';
   let mySide = null;
   let lastState = null;
+  let myName = null;
 
   UI.init();
   Input.init(socket);
@@ -37,6 +38,7 @@
   // Show name modal
   UI.showNameModal(
     (name) => {
+      myName = name;
       socket.emit('join', { name });
       UI.setStatus('Waiting for game...', 'spectating');
     },
@@ -85,6 +87,10 @@
     Input.setPlayerState(false);
     const time = UI.formatTime(data.survivalMs);
     UI.setStatus(`Eliminated! You survived ${time} with ${data.points} points`, 'eliminated');
+    UI.showPlayAgain(() => {
+      socket.emit('join', { name: myName });
+      UI.setStatus('Waiting for game...', 'spectating');
+    });
   });
 
   // Player info updates

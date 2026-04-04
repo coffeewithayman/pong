@@ -11,16 +11,20 @@ const UI = {
     this.playerLeftLabel = document.getElementById('player-left-label');
     this.playerRightLabel = document.getElementById('player-right-label');
     this.spectateBtn = document.getElementById('spectate-btn');
+    this.playAgainBtn = document.getElementById('play-again-btn');
   },
 
   showNameModal(onJoin, onSpectate) {
     this.nameModal.classList.remove('hidden');
     this.gameContainer.classList.remove('active');
+    const saved = localStorage.getItem('pong-name');
+    if (saved) this.nameInput.value = saved;
     this.nameInput.focus();
 
     const submit = () => {
       const name = this.nameInput.value.trim();
       if (name) {
+        localStorage.setItem('pong-name', name);
         onJoin(name);
         this.nameModal.classList.add('hidden');
         this.gameContainer.classList.add('active');
@@ -42,6 +46,20 @@ const UI = {
   setStatus(text, className) {
     this.statusText.textContent = text;
     this.statusText.className = className || '';
+    this.hidePlayAgain();
+  },
+
+  showPlayAgain(callback) {
+    this.playAgainBtn.classList.remove('hidden');
+    this.playAgainBtn.onclick = () => {
+      this.hidePlayAgain();
+      callback();
+    };
+  },
+
+  hidePlayAgain() {
+    this.playAgainBtn.classList.add('hidden');
+    this.playAgainBtn.onclick = null;
   },
 
   updateLeaderboard(entries) {
