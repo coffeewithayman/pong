@@ -49,6 +49,9 @@ class GameManager {
   onScore(scoringSide) {
     // scoringSide = 'left' means left player scored (ball passed right), right player loses
     // scoringSide = 'right' means right player scored (ball passed left), left player loses
+    const loserSideName = scoringSide === 'left' ? 'right' : 'left';
+    const loserPlayer = loserSideName === 'left' ? this.playerLeft : this.playerRight;
+    console.log(`[SCORE] ${scoringSide} scored. Loser: ${loserPlayer ? loserPlayer.name : 'none'} (${loserSideName}). Status was: ${this.status}`);
     this.loop.stop();
     this.status = 'paused';
 
@@ -95,6 +98,7 @@ class GameManager {
   }
 
   fillSlots() {
+    console.log(`[FILL] fillSlots called. Status: ${this.status}, Left: ${this.playerLeft ? this.playerLeft.name : 'empty'}, Right: ${this.playerRight ? this.playerRight.name : 'empty'}, Queue: ${this.queue.size()}`);
     // If champion (left) was eliminated, challenger becomes champion
     if (!this.playerLeft && this.playerRight) {
       this.playerLeft = this.playerRight;
@@ -146,9 +150,25 @@ class GameManager {
   }
 
   startCountdown() {
+    // Cancel any pending pause timeout to prevent race conditions
+    if (this.pauseTimeout) {
+      clearTimeout(this.pauseTimeout);
+      this.pauseTimeout = null;
+    }
+
+    // Stop loop if still running (safety against race conditions)
+    this.loop.stop();
+
+    // Clear any existing countdown interval to prevent leaks
+    if (this.countdownTimeout) {
+      clearInterval(this.countdownTimeout);
+      this.countdownTimeout = null;
+    }
+
     this.engine.reset();
     this.loop.resetInputs();
     this.status = 'countdown';
+    console.log(`[COUNTDOWN] Starting countdown. Left: ${this.playerLeft ? this.playerLeft.name : 'empty'}, Right: ${this.playerRight ? this.playerRight.name : 'empty'}`);
     this.io.to('game').emit('game-status', { status: 'countdown' });
 
     // Notify both players about their sides
@@ -173,6 +193,7 @@ class GameManager {
   }
 
   startGame() {
+    console.log(`[GAME] Game starting. Left: ${this.playerLeft ? this.playerLeft.name : 'empty'}, Right: ${this.playerRight ? this.playerRight.name : 'empty'}`);
     this.status = 'playing';
     this.io.to('game').emit('game-status', { status: 'playing' });
     this.io.to('game').emit('countdown', { seconds: 0 });
@@ -183,6 +204,7 @@ class GameManager {
   }
 
   handleJoin(socket, name) {
+    console.log(`[JOIN] Player "${name}" (${socket.id}) joining. Status: ${this.status}, Left: ${this.playerLeft ? this.playerLeft.name : 'empty'}, Right: ${this.playerRight ? this.playerRight.name : 'empty'}, Queue: ${this.queue.size()}`);
     // If a slot is open, assign directly
     if (!this.playerLeft) {
       this.playerLeft = {
@@ -192,6 +214,7 @@ class GameManager {
         points: 0,
       };
       socket.emit('your-turn', { side: 'left' });
+      console.log(`[JOIN] "${name}" assigned to LEFT slot`);
       this.broadcastPlayerInfo();
       if (this.playerRight) {
         this.startCountdown();
@@ -206,6 +229,7 @@ class GameManager {
         points: 0,
       };
       socket.emit('your-turn', { side: 'right' });
+      console.log(`[JOIN] "${name}" assigned to RIGHT slot`);
       this.broadcastPlayerInfo();
       if (this.playerLeft) {
         this.startCountdown();
@@ -213,6 +237,7 @@ class GameManager {
     } else {
       // Both slots full, add to queue
       this.queue.enqueue(socket.id, name);
+      console.log(`[JOIN] "${name}" added to queue (position ${this.queue.getPosition(socket.id)})`);
       socket.emit('queued', {
         position: this.queue.getPosition(socket.id),
         total: this.queue.size(),
@@ -231,8 +256,13 @@ class GameManager {
   }
 
   handleDisconnect(socket) {
+    const playerName = (this.playerLeft && this.playerLeft.socketId === socket.id) ? this.playerLeft.name
+      : (this.playerRight && this.playerRight.socketId === socket.id) ? this.playerRight.name
+      : 'queued/spectator';
+    console.log(`[DISCONNECT] Socket ${socket.id} ("${playerName}") disconnected. Status: ${this.status}`);
     // If they were in queue, just remove
     if (this.queue.remove(socket.id)) {
+      console.log(`[DISCONNECT] Removed from queue`);
       this.broadcastQueuePositions();
       return;
     }
@@ -256,7 +286,7 @@ class GameManager {
         winnerName: this.playerRight ? this.playerRight.name : null,
       });
       clearTimeout(this.pauseTimeout);
-      setTimeout(() => this.fillSlots(), C.SCORE_PAUSE_MS);
+      this.pauseTimeout = setTimeout(() => this.fillSlots(), C.SCORE_PAUSE_MS);
     } else if (this.playerRight && this.playerRight.socketId === socket.id) {
       const survivalMs = Date.now() - this.playerRight.startTime;
       this.leaderboard.addEntry(this.playerRight.name, survivalMs, this.playerRight.points);
@@ -269,7 +299,7 @@ class GameManager {
         winnerName: this.playerLeft ? this.playerLeft.name : null,
       });
       clearTimeout(this.pauseTimeout);
-      setTimeout(() => this.fillSlots(), C.SCORE_PAUSE_MS);
+      this.pauseTimeout = setTimeout(() => this.fillSlots(), C.SCORE_PAUSE_MS);
     }
   }
 
