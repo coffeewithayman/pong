@@ -7,6 +7,25 @@
   let mySide = null;
   let lastState = null;
   let myName = null;
+  let myGameTimeMs = 0;
+  let myLastRoundStart = null;
+  let timerInterval = null;
+
+  function startTimerDisplay() {
+    if (timerInterval) return;
+    timerInterval = setInterval(() => {
+      const total = myGameTimeMs + (myLastRoundStart ? Date.now() - myLastRoundStart : 0);
+      UI.updateGameTimer(total);
+    }, 200);
+  }
+
+  function stopTimerDisplay() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    UI.hideGameTimer();
+  }
 
   UI.init();
   Input.init(socket);
@@ -109,6 +128,8 @@
   // Assigned as a player
   socket.on('your-turn', (data) => {
     mySide = data.side;
+    myGameTimeMs = 0;
+    myLastRoundStart = null;
     Input.setPlayerState(true);
     const sideLabel = data.side === 'left' ? 'Champion (Left)' : 'Challenger (Right)';
     const color = data.side === 'left' ? Renderer.colors.left : Renderer.colors.right;
@@ -139,6 +160,7 @@
   socket.on('eliminated', (data) => {
     mySide = null;
     Input.setPlayerState(false);
+    stopTimerDisplay();
     UI.showEliminatedModal(data.survivalMs, data.points, () => {
       socket.emit('join', { name: myName });
       UI.setStatus('Waiting for game...', 'spectating');
@@ -149,6 +171,10 @@
   socket.on('player-info', (data) => {
     playerInfo = data;
     UI.updatePlayerLabels(data);
+    if (mySide && data[mySide]) {
+      myGameTimeMs = data[mySide].gameTimeMs;
+      myLastRoundStart = data[mySide].lastRoundStart;
+    }
   });
 
   // Score event (someone got eliminated)
@@ -170,6 +196,7 @@
       const color = mySide === 'left' ? Renderer.colors.left : Renderer.colors.right;
       UI.setStatus(`Playing! You are the ${sideLabel}`, 'playing');
       UI.statusText.style.color = color;
+      startTimerDisplay();
     } else if (data.status === 'playing' && !mySide) {
       UI.setStatus('Watching', 'spectating');
     }
@@ -196,5 +223,6 @@
     UI.setStatus('Disconnected - reconnecting...', '');
     mySide = null;
     Input.setPlayerState(false);
+    stopTimerDisplay();
   });
 })();

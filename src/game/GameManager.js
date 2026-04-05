@@ -29,7 +29,7 @@ class GameManager {
     this.loop = new GameLoop(this.engine, (result) => this.onTick(result));
 
     // Player slots
-    this.playerLeft = null;  // { socketId, name, startTime, points }
+    this.playerLeft = null;  // { socketId, name, gameTimeMs, lastRoundStart, points }
     this.playerRight = null;
 
     this.status = 'waiting'; // waiting | playing | paused | countdown
@@ -60,8 +60,8 @@ class GameManager {
     const winner = loserSide === 'left' ? this.playerRight : this.playerLeft;
 
     if (loser) {
-      // Record loser's stats to leaderboard
-      const survivalMs = Date.now() - loser.startTime;
+      // Record loser's stats to leaderboard (cumulative time)
+      const survivalMs = loser.gameTimeMs + (loser.lastRoundStart ? Date.now() - loser.lastRoundStart : 0);
       this.leaderboard.addEntry(loser.name, survivalMs, loser.points);
 
       // Notify the loser
@@ -76,6 +76,11 @@ class GameManager {
 
     if (winner) {
       winner.points++;
+      // Accumulate winner's game time from the completed round
+      if (winner.lastRoundStart) {
+        winner.gameTimeMs += Date.now() - winner.lastRoundStart;
+        winner.lastRoundStart = null;
+      }
     }
 
     // Clear loser slot
@@ -114,7 +119,8 @@ class GameManager {
         this.playerRight = {
           socketId: next.socketId,
           name: next.name,
-          startTime: Date.now(),
+          gameTimeMs: 0,
+          lastRoundStart: null,
           points: 0,
         };
         const socket = this.io.sockets.sockets.get(next.socketId);
@@ -129,7 +135,8 @@ class GameManager {
         this.playerLeft = {
           socketId: next.socketId,
           name: next.name,
-          startTime: Date.now(),
+          gameTimeMs: 0,
+          lastRoundStart: null,
           points: 0,
         };
         const socket = this.io.sockets.sockets.get(next.socketId);
@@ -197,9 +204,9 @@ class GameManager {
     this.status = 'playing';
     this.io.to('game').emit('game-status', { status: 'playing' });
     this.io.to('game').emit('countdown', { seconds: 0 });
-    // Set start times now that game actually begins
-    if (this.playerLeft) this.playerLeft.startTime = Date.now();
-    if (this.playerRight) this.playerRight.startTime = Date.now();
+    // Set round start times now that game actually begins
+    if (this.playerLeft) this.playerLeft.lastRoundStart = Date.now();
+    if (this.playerRight) this.playerRight.lastRoundStart = Date.now();
     this.loop.start();
   }
 
@@ -210,7 +217,8 @@ class GameManager {
       this.playerLeft = {
         socketId: socket.id,
         name,
-        startTime: Date.now(),
+        gameTimeMs: 0,
+        lastRoundStart: null,
         points: 0,
       };
       socket.emit('your-turn', { side: 'left' });
@@ -225,7 +233,8 @@ class GameManager {
       this.playerRight = {
         socketId: socket.id,
         name,
-        startTime: Date.now(),
+        gameTimeMs: 0,
+        lastRoundStart: null,
         points: 0,
       };
       socket.emit('your-turn', { side: 'right' });
@@ -275,7 +284,7 @@ class GameManager {
 
     // If they were an active player, treat as forfeit
     if (this.playerLeft && this.playerLeft.socketId === socket.id) {
-      const survivalMs = Date.now() - this.playerLeft.startTime;
+      const survivalMs = this.playerLeft.gameTimeMs + (this.playerLeft.lastRoundStart ? Date.now() - this.playerLeft.lastRoundStart : 0);
       this.leaderboard.addEntry(this.playerLeft.name, survivalMs, this.playerLeft.points);
       this.playerLeft = null;
       this.loop.stop();
@@ -288,7 +297,7 @@ class GameManager {
       clearTimeout(this.pauseTimeout);
       this.pauseTimeout = setTimeout(() => this.fillSlots(), C.SCORE_PAUSE_MS);
     } else if (this.playerRight && this.playerRight.socketId === socket.id) {
-      const survivalMs = Date.now() - this.playerRight.startTime;
+      const survivalMs = this.playerRight.gameTimeMs + (this.playerRight.lastRoundStart ? Date.now() - this.playerRight.lastRoundStart : 0);
       this.leaderboard.addEntry(this.playerRight.name, survivalMs, this.playerRight.points);
       this.playerRight = null;
       this.loop.stop();
@@ -354,8 +363,8 @@ class GameManager {
 
   broadcastPlayerInfo() {
     this.io.to('game').emit('player-info', {
-      left: this.playerLeft ? { name: this.playerLeft.name, points: this.playerLeft.points } : null,
-      right: this.playerRight ? { name: this.playerRight.name, points: this.playerRight.points } : null,
+      left: this.playerLeft ? { name: this.playerLeft.name, points: this.playerLeft.points, gameTimeMs: this.playerLeft.gameTimeMs, lastRoundStart: this.playerLeft.lastRoundStart } : null,
+      right: this.playerRight ? { name: this.playerRight.name, points: this.playerRight.points, gameTimeMs: this.playerRight.gameTimeMs, lastRoundStart: this.playerRight.lastRoundStart } : null,
     });
   }
 
@@ -364,8 +373,8 @@ class GameManager {
       status: this.status,
       gameState: this.engine.getState(),
       playerInfo: {
-        left: this.playerLeft ? { name: this.playerLeft.name, points: this.playerLeft.points } : null,
-        right: this.playerRight ? { name: this.playerRight.name, points: this.playerRight.points } : null,
+        left: this.playerLeft ? { name: this.playerLeft.name, points: this.playerLeft.points, gameTimeMs: this.playerLeft.gameTimeMs, lastRoundStart: this.playerLeft.lastRoundStart } : null,
+        right: this.playerRight ? { name: this.playerRight.name, points: this.playerRight.points, gameTimeMs: this.playerRight.gameTimeMs, lastRoundStart: this.playerRight.lastRoundStart } : null,
       },
       leaderboard: this.leaderboard.getTop(),
       queueSize: this.queue.size(),

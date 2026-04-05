@@ -205,6 +205,15 @@ body {
   min-height: 36px;
 }
 
+#game-timer {
+  margin-left: 12px;
+  font-family: 'Courier New', monospace;
+  color: #0f0;
+  font-size: 0.9rem;
+}
+
+#game-timer.hidden { display: none; }
+
 #status-text.playing { color: #0f0; }
 #status-text.queued { color: #ff0; }
 #status-text.spectating { color: #aaa; }
