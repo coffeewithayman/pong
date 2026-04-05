@@ -2,6 +2,7 @@ const C = require('../game/constants');
 
 function setupSocketHandlers(io, gameManager) {
   io.on('connection', (socket) => {
+    console.log(`[CONNECT] New socket connected: ${socket.id}`);
     // Join the game room for broadcasts
     socket.join('game');
 
