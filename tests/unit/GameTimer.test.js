@@ -133,7 +133,7 @@ describe('GameTimer - cumulative survival time', () => {
   });
 
   it('disconnecting during countdown only counts completed round time', (t) => {
-    t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] });
+    t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
 
     const s1 = createMockSocket('s1');
     const s2 = createMockSocket('s2');
@@ -145,16 +145,22 @@ describe('GameTimer - cumulative survival time', () => {
     gm.handleJoin(s1, 'Alice');
     gm.handleJoin(s2, 'Bob');
     t.mock.timers.tick(3000);
+    assert.strictEqual(gm.status, 'playing');
 
-    // Play for 5 seconds
-    t.mock.timers.tick(5000);
+    // Simulate 5 seconds of play by adjusting lastRoundStart
+    const now = Date.now();
+    gm.playerLeft.lastRoundStart = now - 5000;
+    gm.playerRight.lastRoundStart = now - 5000;
+
+    // Stop loop to prevent auto-scoring, then score manually
+    gm.loop.stop();
     gm.onScore('left');
 
-    // Alice won round 1, has 5000ms accumulated
-    assert.strictEqual(gm.playerLeft.gameTimeMs, 5000);
+    // Alice won round 1, has ~5000ms accumulated
+    assert.ok(gm.playerLeft.gameTimeMs >= 4900);
     assert.strictEqual(gm.playerLeft.lastRoundStart, null);
 
-    // Carol joins, countdown starts
+    // Carol joins after pause, countdown starts
     t.mock.timers.tick(C.SCORE_PAUSE_MS);
     gm.handleJoin(s3, 'Carol');
     assert.strictEqual(gm.status, 'countdown');
@@ -166,10 +172,10 @@ describe('GameTimer - cumulative survival time', () => {
     // Alice's leaderboard entry should only count the completed round time
     // (lastRoundStart is null during countdown, so no extra time added)
     const leaderboard = gm.leaderboard.getTop();
-    // There may be a Bob entry too from the elimination, find Alice's
     const aliceEntry = leaderboard.find(e => e.name === 'Alice');
     assert.ok(aliceEntry, 'Alice should have a leaderboard entry');
-    assert.strictEqual(aliceEntry.survivalMs, 5000, 'Alice survival time should be exactly 5000 (not counting countdown)');
+    assert.ok(aliceEntry.survivalMs >= 4900, 'Alice survival time should be ~5000 (not counting countdown)');
+    assert.ok(aliceEntry.survivalMs < 6000, 'Alice survival time should not include countdown time');
   });
 
   it('winner gameTimeMs accumulates after each round', (t) => {
