@@ -17,6 +17,7 @@ const UI = {
     this.eliminatedModal = document.getElementById('eliminated-modal');
     this.eliminatedStats = document.getElementById('eliminated-stats');
     this.rejoinBtn = document.getElementById('rejoin-btn');
+    this.gameTimer = document.getElementById('game-timer');
   },
 
   showNameModal(onJoin, onSpectate) {
@@ -155,6 +156,19 @@ const UI = {
     } catch (e) {
       // Audio not supported or blocked - silently ignore
     }
+  },
+
+  updateGameTimer(ms) {
+    const secs = Math.floor(ms / 1000);
+    const mins = Math.floor(secs / 60);
+    const remainSecs = secs % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    this.gameTimer.textContent = `${pad(mins)}:${pad(remainSecs)}`;
+    this.gameTimer.classList.remove('hidden');
+  },
+
+  hideGameTimer() {
+    this.gameTimer.classList.add('hidden');
   },
 
   formatTime(ms) {
