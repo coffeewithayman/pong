@@ -253,7 +253,7 @@ describe('GameManager', () => {
   });
 
   describe('fillSlots', () => {
-    it('promotes right player to left when left slot is empty', (t) => {
+    it('keeps winner on their current side after elimination', (t) => {
       t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
 
       const s1 = createMockSocket('s1');
@@ -269,9 +269,9 @@ describe('GameManager', () => {
       gm.onScore('right');
       t.mock.timers.tick(C.SCORE_PAUSE_MS);
 
-      // Bob should be promoted to left
-      assert.strictEqual(gm.playerLeft.name, 'Bob');
-      assert.strictEqual(gm.playerRight, null);
+      // Bob should stay on the right side
+      assert.strictEqual(gm.playerLeft, null);
+      assert.strictEqual(gm.playerRight.name, 'Bob');
       assert.strictEqual(gm.status, 'waiting');
     });
 

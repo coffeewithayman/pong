@@ -99,30 +99,8 @@ class GameManager {
 
   fillSlots() {
     console.log(`[FILL] fillSlots called. Status: ${this.status}, Left: ${this.playerLeft ? this.playerLeft.name : 'empty'}, Right: ${this.playerRight ? this.playerRight.name : 'empty'}, Queue: ${this.queue.size()}`);
-    // If champion (left) was eliminated, challenger becomes champion
-    if (!this.playerLeft && this.playerRight) {
-      this.playerLeft = this.playerRight;
-      this.playerRight = null;
-      const socket = this.io.sockets.sockets.get(this.playerLeft.socketId);
-      if (socket) socket.emit('side-change', { side: 'left' });
-    }
 
-    // Fill right slot from queue
-    if (!this.playerRight) {
-      const next = this.queue.dequeue();
-      if (next) {
-        this.playerRight = {
-          socketId: next.socketId,
-          name: next.name,
-          startTime: Date.now(),
-          points: 0,
-        };
-        const socket = this.io.sockets.sockets.get(next.socketId);
-        if (socket) socket.emit('your-turn', { side: 'right' });
-      }
-    }
-
-    // Fill left slot if still empty (fresh start)
+    // Fill empty slots from queue — winner stays on their current side
     if (!this.playerLeft) {
       const next = this.queue.dequeue();
       if (next) {
@@ -134,6 +112,20 @@ class GameManager {
         };
         const socket = this.io.sockets.sockets.get(next.socketId);
         if (socket) socket.emit('your-turn', { side: 'left' });
+      }
+    }
+
+    if (!this.playerRight) {
+      const next = this.queue.dequeue();
+      if (next) {
+        this.playerRight = {
+          socketId: next.socketId,
+          name: next.name,
+          startTime: Date.now(),
+          points: 0,
+        };
+        const socket = this.io.sockets.sockets.get(next.socketId);
+        if (socket) socket.emit('your-turn', { side: 'right' });
       }
     }
 
