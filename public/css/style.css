@@ -274,9 +274,8 @@ body {
 }
 
 .control-btn:active {
-  background: #0f0;
-  color: #000;
-  border-color: #0f0;
+  background: #333;
+  filter: brightness(1.4);
 }
 
 /* Panels (Waiting Room + Leaderboard) */

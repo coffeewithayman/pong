@@ -81,4 +81,20 @@ const Input = {
       this.currentDirection = 0;
     }
   },
+
+  setControlColor(color) {
+    const btnUp = document.getElementById('btn-up');
+    const btnDown = document.getElementById('btn-down');
+    if (color) {
+      btnUp.style.borderColor = color;
+      btnUp.style.color = color;
+      btnDown.style.borderColor = color;
+      btnDown.style.color = color;
+    } else {
+      btnUp.style.borderColor = '';
+      btnUp.style.color = '';
+      btnDown.style.borderColor = '';
+      btnDown.style.color = '';
+    }
+  },
 };

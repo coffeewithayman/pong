@@ -114,6 +114,7 @@
     const color = data.side === 'left' ? Renderer.colors.left : Renderer.colors.right;
     UI.setStatus(`Your turn! You are the ${sideLabel}`, 'playing');
     UI.statusText.style.color = color;
+    Input.setControlColor(color);
   });
 
   // Side changed (promoted to champion)
@@ -121,6 +122,7 @@
     mySide = data.side;
     UI.setStatus('You are now the Champion (Left)!', 'playing');
     UI.statusText.style.color = Renderer.colors.left;
+    Input.setControlColor(Renderer.colors.left);
   });
 
   // Queued
@@ -139,6 +141,7 @@
   socket.on('eliminated', (data) => {
     mySide = null;
     Input.setPlayerState(false);
+    Input.setControlColor(null);
     UI.showEliminatedModal(data.survivalMs, data.points, () => {
       socket.emit('join', { name: myName });
       UI.setStatus('Waiting for game...', 'spectating');
@@ -196,5 +199,6 @@
     UI.setStatus('Disconnected - reconnecting...', '');
     mySide = null;
     Input.setPlayerState(false);
+    Input.setControlColor(null);
   });
 })();
