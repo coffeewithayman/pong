@@ -117,14 +117,6 @@
     Input.setControlColor(color);
   });
 
-  // Side changed (promoted to champion)
-  socket.on('side-change', (data) => {
-    mySide = data.side;
-    UI.setStatus('You are now the Champion (Left)!', 'playing');
-    UI.statusText.style.color = Renderer.colors.left;
-    Input.setControlColor(Renderer.colors.left);
-  });
-
   // Queued
   socket.on('queued', (data) => {
     mySide = null;
