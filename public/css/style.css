@@ -372,15 +372,24 @@ body {
   color: #ffd700;
 }
 
-/* GitHub Bar */
-#github-bar {
-  position: fixed;
-  top: 14px;
-  right: 16px;
+/* Site Footer */
+#site-footer {
+  width: 100%;
+  max-width: 850px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-top: 1px solid #333;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 12px;
-  z-index: 200;
+}
+
+#footer-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 #github-icon {
@@ -392,6 +401,71 @@ body {
 #github-icon:hover {
   color: #fff;
 }
+
+#changelog-toggle {
+  background: transparent;
+  border: none;
+  color: #0f0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#changelog-toggle:hover {
+  color: #0d0;
+}
+
+#changelog-panel {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+#changelog-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#changelog-panel li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+#changelog-panel li:last-child {
+  border-bottom: none;
+}
+
+.cl-date {
+  color: #555;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+.cl-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.cl-tag.feat { background: #1a3a1a; color: #0f0; border: 1px solid #0a0; }
+.cl-tag.fix  { background: #3a2a00; color: #fc0; border: 1px solid #a80; }
+.cl-tag.init { background: #222; color: #888; border: 1px solid #444; }
 
 /* Responsive */
 @media (max-width: 768px) {

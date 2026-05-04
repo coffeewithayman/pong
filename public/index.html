@@ -107,16 +107,39 @@
     </div><!-- /panels -->
   </div>
 
-  <!-- GitHub Links -->
-  <div id="github-bar">
-    <a href="https://github.com/coffeewithayman/pong" target="_blank" rel="noopener" id="github-icon" aria-label="View on GitHub">
-      <svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-      </svg>
-    </a>
-    <a class="github-button" href="https://github.com/coffeewithayman/pong" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star coffeewithayman/pong on GitHub">Star</a>
-  </div>
+  <!-- Footer -->
+  <footer id="site-footer">
+    <div id="footer-links">
+      <a href="https://github.com/coffeewithayman/pong" target="_blank" rel="noopener" id="github-icon" aria-label="View on GitHub">
+        <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+      </a>
+      <a class="github-button" href="https://github.com/coffeewithayman/pong" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star coffeewithayman/pong on GitHub">Star</a>
+      <button id="changelog-toggle" aria-expanded="false" aria-controls="changelog-panel">Changelog</button>
+    </div>
+    <div id="changelog-panel" class="hidden" role="region" aria-label="Changelog">
+      <ul>
+        <li><span class="cl-date">2026-05-04</span><span class="cl-tag fix">fix</span>Track cumulative active play time for leaderboard</li>
+        <li><span class="cl-date">2026-05-03</span><span class="cl-tag fix">fix</span>Swap mobile buttons — DOWN on left, UP on right</li>
+        <li><span class="cl-date">2026-05-01</span><span class="cl-tag fix">fix</span>Keep winning player on the same side between rounds</li>
+        <li><span class="cl-date">2026-05-01</span><span class="cl-tag feat">feat</span>Color mobile control arrows to match paddle color</li>
+        <li><span class="cl-date">2026-04-05</span><span class="cl-tag feat">feat</span>Countdown timer, color-coded sides, doorbell sound, mobile fixes</li>
+        <li><span class="cl-date">2026-04-04</span><span class="cl-tag feat">feat</span>Elimination modal with stats and Enter key support</li>
+        <li><span class="cl-date">2026-04-04</span><span class="cl-tag feat">feat</span>Play Again button to re-queue after elimination</li>
+        <li><span class="cl-date">2026-04-03</span><span class="cl-tag init">init</span>Initial release</li>
+      </ul>
+    </div>
+  </footer>
   <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <script>
+    document.getElementById('changelog-toggle').addEventListener('click', function() {
+      var panel = document.getElementById('changelog-panel');
+      var open = !panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', open);
+      this.setAttribute('aria-expanded', String(!open));
+    });
+  </script>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/renderer.js"></script>
