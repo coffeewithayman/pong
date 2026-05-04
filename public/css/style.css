@@ -34,6 +34,7 @@ body {
 }
 
 .modal.hidden { display: none; }
+.hidden { display: none; }
 
 .modal-content {
   background: #222;
@@ -412,6 +413,9 @@ body {
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 3px;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
 }
 
 #changelog-toggle:hover {
