@@ -61,4 +61,4 @@ npm test             # Both
 
 ## Contributing
 
-Pull requests are welcome! For major changes, open an issue first to discuss what you'd like to change.
+Please open an issue if you are interested in contributing.
