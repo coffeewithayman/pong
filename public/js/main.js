@@ -1,5 +1,9 @@
 // Main client entry point
 (function () {
+  // === ENABLE DIAGNOSTICS HERE ===
+  const ENABLE_DIAGNOSTICS = false;
+  // Set to true to see lag diagnostics overlay during gameplay
+
   const socket = io();
   let constants = null;
   let playerInfo = null;
@@ -14,8 +18,8 @@
     latencyEstimates: [],
     renderTimes: [],
     lastStateTime: null,
-    showOverlay: false,
-    enabled: true,
+    showOverlay: ENABLE_DIAGNOSTICS,
+    enabled: ENABLE_DIAGNOSTICS,
 
     recordTick(serverTime) {
       const now = Date.now();
@@ -59,13 +63,6 @@
       };
     }
   };
-
-  // Toggle diagnostics with 'D' key
-  document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'd') {
-      diagnostics.showOverlay = !diagnostics.showOverlay;
-    }
-  });
 
   UI.init();
   Input.init(socket);
