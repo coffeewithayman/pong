@@ -8,6 +8,65 @@
   let lastState = null;
   let myName = null;
 
+  // Diagnostics tracking
+  const diagnostics = {
+    tickTimestamps: [],
+    latencyEstimates: [],
+    renderTimes: [],
+    lastStateTime: null,
+    showOverlay: false,
+    enabled: true,
+
+    recordTick(serverTime) {
+      const now = Date.now();
+      this.tickTimestamps.push(now);
+      this.latencyEstimates.push(now - serverTime);
+      if (this.tickTimestamps.length > 120) {
+        this.tickTimestamps.shift();
+        this.latencyEstimates.shift();
+      }
+    },
+
+    recordRender(ms) {
+      this.renderTimes.push(ms);
+      if (this.renderTimes.length > 120) this.renderTimes.shift();
+    },
+
+    getStats() {
+      if (this.latencyEstimates.length === 0) return null;
+      const ticks = this.tickTimestamps;
+      const latencies = this.latencyEstimates;
+
+      const tickIntervals = [];
+      for (let i = 1; i < ticks.length; i++) {
+        tickIntervals.push(ticks[i] - ticks[i-1]);
+      }
+
+      const avg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+      const min = (arr) => arr.length ? Math.min(...arr) : 0;
+      const max = (arr) => arr.length ? Math.max(...arr) : 0;
+
+      return {
+        updateFrequency: tickIntervals.length ? (1000 / avg(tickIntervals)).toFixed(1) : '0',
+        tickIntervalAvg: avg(tickIntervals).toFixed(1),
+        tickIntervalMin: min(tickIntervals),
+        tickIntervalMax: max(tickIntervals),
+        latencyAvg: avg(latencies).toFixed(0),
+        latencyMin: min(latencies),
+        latencyMax: max(latencies),
+        renderAvg: avg(this.renderTimes).toFixed(2),
+        renderMax: max(this.renderTimes).toFixed(2),
+      };
+    }
+  };
+
+  // Toggle diagnostics with 'D' key
+  document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'd') {
+      diagnostics.showOverlay = !diagnostics.showOverlay;
+    }
+  });
+
   UI.init();
   Input.init(socket);
 
@@ -36,7 +95,7 @@
       } else if (gameStatus === 'countdown') {
         Renderer.drawCountdown(3, playerInfo);
       } else {
-        Renderer.draw(lastState, playerInfo);
+        Renderer.draw(lastState, playerInfo, diagnostics);
       }
     }
   });
@@ -55,9 +114,14 @@
 
   // Game state updates (60fps from server)
   socket.on('state', (state) => {
+    const renderStart = performance.now();
     lastState = state;
     if (constants) {
-      Renderer.draw(state, playerInfo);
+      if (state.serverTime) {
+        diagnostics.recordTick(state.serverTime);
+      }
+      Renderer.draw(state, playerInfo, diagnostics);
+      diagnostics.recordRender(performance.now() - renderStart);
     }
   });
 
@@ -149,7 +213,7 @@
   // Score event (someone got eliminated)
   socket.on('score-event', (data) => {
     if (data.loserName && lastState && constants) {
-      Renderer.draw(lastState, playerInfo);
+      Renderer.draw(lastState, playerInfo, diagnostics);
       Renderer.drawScoreEvent(`${data.loserName} eliminated!`);
     }
   });

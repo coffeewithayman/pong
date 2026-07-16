@@ -38,8 +38,12 @@ class GameManager {
   }
 
   onTick(result) {
-    // Broadcast state to all connected clients
-    this.io.to('game').emit('state', result.state);
+    // Broadcast state to all connected clients with server timestamp for diagnostics
+    const stateWithTimestamp = {
+      ...result.state,
+      serverTime: Date.now(),
+    };
+    this.io.to('game').emit('state', stateWithTimestamp);
 
     if (result.scored) {
       this.onScore(result.scored);
