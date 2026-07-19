@@ -26,7 +26,7 @@ const Renderer = {
     this.ctx.setTransform(this.scaleX, 0, 0, this.scaleY, 0, 0);
   },
 
-  draw(state, playerInfo) {
+  draw(state, playerInfo, diagnostics) {
     if (this.canvas.width === 0 || this.canvas.height === 0) {
       this.resize();
     }
@@ -89,6 +89,35 @@ const Renderer = {
           (C.CANVAS_WIDTH * 3) / 4,
           30
         );
+      }
+    }
+
+    // Diagnostics overlay (press 'D' to toggle)
+    if (diagnostics && diagnostics.showOverlay) {
+      const stats = diagnostics.getStats();
+      if (stats) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(0, 0, 320, 200);
+
+        ctx.fillStyle = '#0f0';
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'left';
+        let y = 15;
+        const lineHeight = 14;
+
+        ctx.fillText(`Update Freq: ${stats.updateFrequency} fps`, 10, y);
+        y += lineHeight;
+        ctx.fillText(`Tick Int: ${stats.tickIntervalAvg}ms (${stats.tickIntervalMin}-${stats.tickIntervalMax})`, 10, y);
+        y += lineHeight;
+        ctx.fillText(`Latency: ${stats.latencyAvg}ms (${stats.latencyMin}-${stats.latencyMax})`, 10, y);
+        y += lineHeight;
+        ctx.fillText(`Render: ${stats.renderAvg}ms (max ${stats.renderMax})`, 10, y);
+        y += lineHeight + 4;
+        ctx.fillText('Network:', 10, y);
+        y += lineHeight;
+        const latencyNum = parseInt(stats.latencyAvg);
+        ctx.fillStyle = latencyNum < 50 ? '#0f0' : latencyNum < 100 ? '#ff0' : '#f00';
+        ctx.fillText(`${latencyNum}ms roundtrip`, 10, y);
       }
     }
   },
