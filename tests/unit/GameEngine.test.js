@@ -28,6 +28,16 @@ describe('GameEngine', () => {
       engine.reset();
       assert.ok(engine.ball.vx !== 0 || engine.ball.vy !== 0);
     });
+
+    it('starts the ball at 2x the original speed (8)', () => {
+      engine.reset();
+      assert.strictEqual(engine.ball.speed, 8);
+      assert.ok(Math.abs(Math.hypot(engine.ball.vx, engine.ball.vy) - 8) < 1e-9);
+    });
+
+    it('keeps the starting speed below the max speed', () => {
+      assert.ok(C.BALL_INITIAL_SPEED < C.BALL_MAX_SPEED);
+    });
   });
 
   describe('tick - ball movement', () => {
